@@ -14,18 +14,27 @@ source:
   patches:
     # - 0001-Also-look-in-libtinfo-for-tgetent.patch
 
-
 build:
+{% if bootstrapping == 'yes' %}
+  # Please increment by two
+  number: 0
+  string: h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}_bootstrapping
+{% else %}
+  # Keep above the number of the _bootstrapping package
   number: 2
+{% endif %}
   run_exports:
     # no info available.  Guessing at x.x.  Change if you know better.
     - {{ pin_subpackage('libedit', max_pin='x.x') }}
   skip: True   # [win]
+  script_env:
+    - BOOTSTRAPPING={{ bootstrapping }}
 
 requirements:
   build:
-    - libtool  # [unix]
     - {{ compiler('c') }}
+{% if bootstrapping != 'yes' %}
+    - libtool  # [unix]
     - automake
     - autoconf
     - perl
@@ -35,6 +44,7 @@ requirements:
     - ncurses
   run:
     - ncurses
+{% endif %}
 
 test:
   commands:
